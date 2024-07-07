@@ -38,3 +38,4 @@
 2026-03-28T15:05:55  perf: micro-optimization
 2024-06-18T11:31:41  feat(ci): add pagination to large reports
 2024-06-27T18:48:48  docs(fixtures): improve error messages with context
+2024-07-07T13:05:55  style(output): short-circuit on first critical
