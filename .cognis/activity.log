@@ -40,3 +40,4 @@
 2024-06-27T18:48:48  docs(fixtures): improve error messages with context
 2024-07-07T13:05:55  style(output): short-circuit on first critical
 2024-08-05T08:22:02  ci(config): fix off-by-one in line numbers
+2024-08-15T15:39:09  fix(scoring): respect .gitignore when walking
