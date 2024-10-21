@@ -43,3 +43,4 @@
 2024-08-15T15:39:09  fix(scoring): respect .gitignore when walking
 2024-09-13T10:56:16  perf(report): trim whitespace in parsed fields
 2024-09-23T17:13:23  perf(output): extract the scorer
+2024-10-21T12:30:30  build(detect): guard against ReDoS in patterns
