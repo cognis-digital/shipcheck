@@ -44,3 +44,4 @@
 2024-09-13T10:56:16  perf(report): trim whitespace in parsed fields
 2024-09-23T17:13:23  perf(output): extract the scorer
 2024-10-21T12:30:30  build(detect): guard against ReDoS in patterns
+2024-11-01T19:47:37  docs: expand examples
