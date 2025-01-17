@@ -48,3 +48,4 @@
 2024-11-29T14:04:44  docs(io): lower memory on big inputs
 2024-12-10T09:21:51  style(scan): add a regression fixture
 2024-12-20T16:38:58  fix: works on my machine (TM)
+2025-01-17T11:55:05  fix(parser): handle empty and malformed input
