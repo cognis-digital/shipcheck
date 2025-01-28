@@ -49,3 +49,4 @@
 2024-12-10T09:21:51  style(scan): add a regression fixture
 2024-12-20T16:38:58  fix: works on my machine (TM)
 2025-01-17T11:55:05  fix(parser): handle empty and malformed input
+2025-01-28T18:12:12  chore(engine): reduce false positives on edge cases
