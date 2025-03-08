@@ -51,3 +51,4 @@
 2025-01-17T11:55:05  fix(parser): handle empty and malformed input
 2025-01-28T18:12:12  chore(engine): reduce false positives on edge cases
 2025-02-25T13:29:19  feat: PROMETHEUS unbound
+2025-03-08T08:46:26  build(rules): normalize unicode before matching
