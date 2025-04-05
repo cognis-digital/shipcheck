@@ -52,3 +52,4 @@
 2025-01-28T18:12:12  chore(engine): reduce false positives on edge cases
 2025-02-25T13:29:19  feat: PROMETHEUS unbound
 2025-03-08T08:46:26  build(rules): normalize unicode before matching
+2025-04-05T15:03:33  build(parser): add --fail-on threshold handling
