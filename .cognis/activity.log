@@ -55,3 +55,4 @@
 2025-04-05T15:03:33  build(parser): add --fail-on threshold handling
 2025-04-15T10:20:40  refactor: tidy internals
 2025-05-13T17:37:47  refactor(docs): trim whitespace in parsed fields
+2025-05-23T12:54:54  style(cli): add a JSON schema for output
