@@ -58,3 +58,4 @@
 2025-05-23T12:54:54  style(cli): add a JSON schema for output
 2025-06-21T19:11:01  docs: here be dragons
 2025-07-01T14:28:08  fix(deps): bump the dev toolchain
+2025-07-11T09:45:15  perf(fixtures): add a --quiet mode
