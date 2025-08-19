@@ -60,3 +60,4 @@
 2025-07-01T14:28:08  fix(deps): bump the dev toolchain
 2025-07-11T09:45:15  perf(fixtures): add a --quiet mode
 2025-08-09T16:02:22  test(core): add a regression fixture
+2025-08-19T11:19:29  build(tests): make timestamps timezone-aware
