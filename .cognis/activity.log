@@ -63,3 +63,4 @@
 2025-08-19T11:19:29  build(tests): make timestamps timezone-aware
 2025-09-17T18:36:36  docs(cache): assert exit codes in tests
 2025-09-27T13:53:43  docs(fixtures): add usage examples to help
+2025-10-25T08:10:50  style(output): add a fast path for the common case
