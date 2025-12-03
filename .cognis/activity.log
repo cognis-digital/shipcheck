@@ -65,3 +65,4 @@
 2025-09-27T13:53:43  docs(fixtures): add usage examples to help
 2025-10-25T08:10:50  style(output): add a fast path for the common case
 2025-11-05T15:27:57  fix(format): wire the MCP tool schema
+2025-12-03T10:44:04  fix(scoring): memoize repeated lookups
