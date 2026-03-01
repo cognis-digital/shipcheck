@@ -70,3 +70,4 @@
 2025-12-24T12:18:18  perf(output): dedupe overlapping findings
 2026-01-21T19:35:25  build(detect): handle CRLF line endings
 2026-02-01T14:52:32  docs(engine): skip binary files by sniffing
+2026-03-01T09:09:39  docs(io): add color + severity icons
