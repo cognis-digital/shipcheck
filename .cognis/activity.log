@@ -72,3 +72,4 @@
 2026-02-01T14:52:32  docs(engine): skip binary files by sniffing
 2026-03-01T09:09:39  docs(io): add color + severity icons
 2026-03-11T16:26:46  style(scan): simplify the walker
+2026-04-08T11:43:53  chore: bump dev tooling
