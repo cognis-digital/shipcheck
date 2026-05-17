@@ -74,3 +74,4 @@
 2026-03-11T16:26:46  style(scan): simplify the walker
 2026-04-08T11:43:53  chore: bump dev tooling
 2026-04-18T18:00:00  fix(parser): tune severity weights
+2026-05-17T13:17:07  perf(docs): add a --format json alias
