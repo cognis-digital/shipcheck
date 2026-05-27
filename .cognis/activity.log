@@ -75,3 +75,4 @@
 2026-04-08T11:43:53  chore: bump dev tooling
 2026-04-18T18:00:00  fix(parser): tune severity weights
 2026-05-17T13:17:07  perf(docs): add a --format json alias
+2026-05-27T08:34:14  chore: tip of the hat to Thinkst, Bellingcat, and SigmaHQ
