@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: shipcheck, labels: { app: shipcheck } }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: shipcheck } }
+  template:
+    metadata: { labels: { app: shipcheck } }
+    spec:
+      containers:
+        - name: shipcheck
+          image: ghcr.io/cognis-digital/shipcheck:latest
+          ports: [{ containerPort: 8000 }]
+          resources:
+            requests: { cpu: "50m", memory: "64Mi" }
+            limits: { cpu: "500m", memory: "256Mi" }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: shipcheck }
+spec:
+  selector: { app: shipcheck }
+  ports: [{ port: 80, targetPort: 8000 }]
