@@ -1,0 +1,10 @@
+{
+  "name": "@cognis/shipcheck",
+  "version": "0.2.0",
+  "description": "JavaScript port of shipcheck (Cognis Neural Suite)",
+  "bin": {
+    "shipcheck": "index.js"
+  },
+  "license": "LicenseRef-COCL-1.0",
+  "type": "module"
+}
