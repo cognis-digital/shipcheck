@@ -16,7 +16,7 @@
 </div>
 
 ```bash
-pip install cognis-shipcheck
+pip install "git+https://github.com/cognis-digital/shipcheck.git"
 shipcheck scan .            # → prioritized findings in seconds
 ```
 
@@ -47,7 +47,7 @@ container DX
 ## Quick start
 
 ```bash
-pip install cognis-shipcheck
+pip install "git+https://github.com/cognis-digital/shipcheck.git"
 shipcheck --version
 shipcheck scan .                       # scan current project
 shipcheck scan . --format json         # machine-readable
