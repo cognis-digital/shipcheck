@@ -34,3 +34,6 @@ shipcheck = "shipcheck.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["shipcheck"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
