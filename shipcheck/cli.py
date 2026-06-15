@@ -68,6 +68,17 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
+    try:
+        return _main(argv)
+    except KeyboardInterrupt:
+        sys.stderr.write("\ninterrupted\n")
+        return 130
+    except Exception as exc:  # pragma: no cover
+        sys.stderr.write(f"internal error: {exc}\n")
+        return 3
+
+
+def _main(argv: Optional[List[str]] = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -84,6 +95,10 @@ def main(argv: Optional[List[str]] = None) -> int:
             report = lint_file(path)
         except FileNotFoundError:
             sys.stderr.write(f"error: file not found: {path}\n")
+            had_error = True
+            continue
+        except ValueError as exc:
+            sys.stderr.write(f"error: {exc}\n")
             had_error = True
             continue
         except OSError as exc:

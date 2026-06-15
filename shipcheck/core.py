@@ -166,7 +166,6 @@ def _check(instrs: List[_Instr]) -> List[Finding]:
     saw_from = False
     run_count = 0
     copy_dot_line: Optional[int] = None
-    saw_dep_install_after_copy_dot = False
 
     for idx, ins in enumerate(instrs):
         cmd, args = ins.cmd, ins.args
@@ -239,7 +238,7 @@ def _check(instrs: List[_Instr]) -> List[Finding]:
                      "possible hard-coded secret in RUN layer",
                      "use build secrets/args, never bake credentials into layers")
             if copy_dot_line is not None:
-                saw_dep_install_after_copy_dot = True
+                pass  # dep-install after COPY . noted; reserved for future rule
 
         elif cmd == "ADD":
             # SC240: ADD used where COPY suffices (no URL, no tar auto-extract intent)
@@ -254,12 +253,13 @@ def _check(instrs: List[_Instr]) -> List[Finding]:
         elif cmd == "COPY":
             # SC250: COPY . . before dependency install hurts layer caching
             tokens = args.split()
-            srcs = [t for t in tokens[:-1] if not t.startswith("--")] if len(tokens) >= 2 else tokens
+            srcs = (
+                [t for t in tokens[:-1] if not t.startswith("--")]
+                if len(tokens) >= 2
+                else tokens
+            )
             if any(s in (".", "./") for s in srcs) and copy_dot_line is None:
                 copy_dot_line = ins.line
-                copy_dot_instr = ins  # noqa: F841
-                # defer the finding decision until end (need to know if deps follow)
-                _pending_copy_dot = ins
                 findings.append(Finding(
                     code="SC250", severity="info", line=ins.line,
                     instruction="COPY",
@@ -301,6 +301,12 @@ def _check(instrs: List[_Instr]) -> List[Finding]:
 
 
 def lint_text(text: str, path: str = "<text>") -> Report:
+    """Lint Dockerfile content supplied as a string.
+
+    An empty or whitespace-only text returns a Report with zero findings.
+    """
+    if not isinstance(text, str):
+        raise TypeError(f"lint_text expects a str, got {type(text).__name__}")
     instrs = _parse(text)
     stages = sum(1 for i in instrs if i.cmd == "FROM")
     report = Report(path=path, stages=stages, instructions=len(instrs))
@@ -309,6 +315,18 @@ def lint_text(text: str, path: str = "<text>") -> Report:
 
 
 def lint_file(path: str) -> Report:
-    with open(path, "r", encoding="utf-8") as fh:
-        text = fh.read()
+    """Read *path* and lint it.
+
+    Raises:
+        FileNotFoundError: if *path* does not exist.
+        OSError: for other I/O problems.
+        ValueError: if the file cannot be decoded as UTF-8.
+    """
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            text = fh.read()
+    except UnicodeDecodeError as exc:
+        raise ValueError(
+            f"file is not valid UTF-8 and cannot be parsed as a Dockerfile: {path}"
+        ) from exc
     return lint_text(text, path=path)
