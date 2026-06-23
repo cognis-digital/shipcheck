@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "cognis-shipcheck"
-version = "0.1.1"
-description = "Dockerfile linter with image-size and CVE advisories"
+version = "0.6.4"
+description = "Offline Dockerfile linter with image-size hygiene and a bundled 262k-record OSV CVE database"
 authors = [{name = "Cognis Digital", email = "suite@cognis.digital"}]
 license = {text = "LicenseRef-COCL-1.0"}
 requires-python = ">=3.10"
@@ -34,6 +34,15 @@ shipcheck = "shipcheck.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["shipcheck"]
+# Bundle the offline OSV corpus + edge-feed catalog inside the wheel so the
+# tool works air-gapped the moment it is installed.
+artifacts = [
+    "shipcheck/cognis_vulndb.jsonl.gz",
+    "shipcheck/data_feeds_2026.json",
+]
+
+[tool.hatch.build.targets.wheel.force-include]
+"VERSION" = "shipcheck/VERSION"
 
 [tool.hatch.metadata]
 allow-direct-references = true

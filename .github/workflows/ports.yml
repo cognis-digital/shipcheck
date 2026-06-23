@@ -1,0 +1,69 @@
+name: ports
+
+# Build and test the polyglot ports of the shipcheck Dockerfile linter.
+# Each port mirrors the primary `shipcheck lint` command surface and ships a
+# smoke test that asserts the same finding codes as the Python reference.
+
+on:
+  push:
+    paths:
+      - "ports/**"
+      - ".github/workflows/ports.yml"
+  pull_request:
+    paths:
+      - "ports/**"
+      - ".github/workflows/ports.yml"
+  workflow_dispatch:
+
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ports/go
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.21"
+      - run: go vet ./...
+      - run: go test -v ./...
+      - run: go build -o shipcheck-go .
+      - name: smoke
+        run: |
+          printf 'FROM node:12\nRUN apt-get update\n' > Dockerfile.smoke
+          ./shipcheck-go Dockerfile.smoke || true
+          ./shipcheck-go Dockerfile.smoke | grep -q SC120
+
+  rust:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ports/rust
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test
+      - run: cargo build --release
+      - name: smoke
+        run: |
+          printf 'FROM node:12\nRUN apt-get update\n' > Dockerfile.smoke
+          ./target/release/shipcheck Dockerfile.smoke || true
+          ./target/release/shipcheck Dockerfile.smoke | grep -q SC120
+
+  node:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ports/javascript
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: node index.test.js
+      - name: smoke
+        run: |
+          printf 'FROM node:12\nRUN apt-get update\n' > Dockerfile.smoke
+          node index.js Dockerfile.smoke || true
+          node index.js Dockerfile.smoke | grep -q SC120

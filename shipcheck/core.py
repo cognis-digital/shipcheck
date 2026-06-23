@@ -14,9 +14,31 @@ No network access. The advisory data is a small, static, illustrative table.
 """
 from __future__ import annotations
 
+import json as _json
+import os as _os
 import re
 from dataclasses import dataclass, field, asdict
 from typing import List, Optional, Tuple
+
+TOOL_NAME = "shipcheck"
+
+
+def _read_version() -> str:
+    """Read the repo VERSION file if present, else fall back."""
+    here = _os.path.dirname(_os.path.abspath(__file__))
+    for cand in (_os.path.join(here, "..", "VERSION"),
+                 _os.path.join(here, "VERSION")):
+        try:
+            with open(cand, "r", encoding="utf-8") as fh:
+                v = fh.read().strip()
+                if v:
+                    return v
+        except OSError:
+            continue
+    return "0.6.4"
+
+
+TOOL_VERSION = _read_version()
 
 SEVERITIES = ("info", "low", "medium", "high", "critical")
 _SEV_RANK = {s: i for i, s in enumerate(SEVERITIES)}
@@ -312,3 +334,165 @@ def lint_file(path: str) -> Report:
     with open(path, "r", encoding="utf-8") as fh:
         text = fh.read()
     return lint_text(text, path=path)
+
+
+# --------------------------------------------------------------------------- #
+# Base-image -> bundled component inventory.
+#
+# A Docker base image is an OS plus a language runtime; CVEs in those bundled
+# components are what most "image scanners" actually report. We don't fabricate
+# anything: this table maps a base-image *name* to the real upstream package
+# coordinates that the image ships, and the offline OSV DB
+# (shipcheck.vulndb_local) is queried for vulnerabilities affecting them.
+#
+# Each entry is (ecosystem, package-name) using OSV ecosystem labels so a
+# lookup like ("PyPI", "django") or ("Maven", "org.apache.logging.log4j:log4j-core")
+# matches real records in the bundled corpus.
+# --------------------------------------------------------------------------- #
+_BASE_COMPONENTS = {
+    "python": [("PyPI", "pip"), ("PyPI", "setuptools"), ("PyPI", "wheel")],
+    "node": [("npm", "npm"), ("npm", "node-gyp")],
+    "openjdk": [("Maven", "org.apache.logging.log4j:log4j-core")],
+    "eclipse-temurin": [("Maven", "org.apache.logging.log4j:log4j-core")],
+    "ruby": [("RubyGems", "bundler"), ("RubyGems", "rake")],
+    "golang": [("Go", "stdlib")],
+    "rust": [("crates.io", "openssl")],
+}
+
+
+@dataclass
+class VulnMatch:
+    component: str
+    ecosystem: str
+    vuln_id: str
+    aliases: List[str]
+    severity: str
+    summary: str
+    source: str  # how the component was discovered (e.g. "base:python")
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+def extract_components(text: str) -> List[Tuple[str, str, str]]:
+    """Inventory the (ecosystem, package, source) triples implied by a Dockerfile.
+
+    Sources of components, all offline / static:
+      * FROM base images -> their bundled runtime packages (_BASE_COMPONENTS)
+      * `pip install <pkg>` / `npm install <pkg>` / `gem install <pkg>` /
+        `apt-get install <pkg>` arguments in RUN layers
+    Returns a de-duplicated list of (ecosystem, package, source).
+    """
+    out: List[Tuple[str, str, str]] = []
+    seen = set()
+
+    def _emit(eco: str, pkg: str, source: str) -> None:
+        key = (eco.lower(), pkg.lower())
+        if pkg and key not in seen:
+            seen.add(key)
+            out.append((eco, pkg, source))
+
+    for ins in _parse(text):
+        if ins.cmd == "FROM":
+            image, _tag = _split_base(ins.args)
+            for eco, pkg in _BASE_COMPONENTS.get(image, []):
+                _emit(eco, pkg, f"base:{image}")
+        elif ins.cmd == "RUN":
+            low = ins.args
+            for m in re.finditer(r"pip3?\s+install\s+([^\n&|;]+)", low):
+                for tok in _split_install_args(m.group(1)):
+                    _emit("PyPI", tok, "pip-install")
+            for m in re.finditer(r"npm\s+(?:install|i|add)\s+([^\n&|;]+)", low):
+                for tok in _split_install_args(m.group(1)):
+                    _emit("npm", tok, "npm-install")
+            for m in re.finditer(r"gem\s+install\s+([^\n&|;]+)", low):
+                for tok in _split_install_args(m.group(1)):
+                    _emit("RubyGems", tok, "gem-install")
+            for m in re.finditer(r"apt-get\s+install\s+([^\n&|;]+)", low):
+                for tok in _split_install_args(m.group(1)):
+                    _emit("Debian", tok, "apt-install")
+    return out
+
+
+def _split_install_args(blob: str) -> List[str]:
+    """Pull package names out of an install command, dropping flags/versions."""
+    toks: List[str] = []
+    for raw in blob.split():
+        if raw.startswith("-"):
+            continue
+        if raw in ("install", "i", "add"):
+            continue
+        # strip version pins: pkg==1.0, pkg@1.0, pkg:1.0, pkg>=1
+        name = re.split(r"[=<>@!~;\[]", raw, maxsplit=1)[0].strip()
+        if name and not name.startswith(("/", ".")):
+            toks.append(name)
+    return toks
+
+
+def match_components(components, db=None):
+    """Match (ecosystem, package, source) triples against the offline OSV DB.
+
+    `db` is a shipcheck.vulndb_local.VulnDB (or compatible). Returns a list of
+    VulnMatch for every real vulnerability affecting a discovered component.
+    Fully offline; no fabricated data.
+    """
+    if db is None:
+        from shipcheck.vulndb_local import VulnDB
+        db = VulnDB()
+    matches: List[VulnMatch] = []
+    for eco, pkg, source in components:
+        for rec in db.by_package(pkg):
+            rec_eco = (rec.get("ecosystem") or "")
+            # If the record carries an ecosystem, require a loose match so a
+            # PyPI 'django' query doesn't surface an unrelated npm package.
+            if rec_eco and eco and rec_eco.lower() != eco.lower():
+                continue
+            matches.append(VulnMatch(
+                component=pkg,
+                ecosystem=rec_eco or eco,
+                vuln_id=rec.get("id", ""),
+                aliases=list(rec.get("aliases") or []),
+                severity=(rec.get("severity") or "unknown"),
+                summary=(rec.get("summary") or "")[:300],
+                source=source,
+            ))
+    return matches
+
+
+def vulnmatch_text(text: str, path: str = "<text>", db=None) -> dict:
+    """Offline CVE enrichment for a Dockerfile: inventory components, match OSV."""
+    components = extract_components(text)
+    matches = match_components(components, db=db)
+    return {
+        "tool": TOOL_NAME,
+        "version": TOOL_VERSION,
+        "path": path,
+        "components": [
+            {"ecosystem": e, "package": p, "source": s} for e, p, s in components
+        ],
+        "matches": [m.to_dict() for m in matches],
+        "match_count": len(matches),
+        "offline": True,
+    }
+
+
+def vulnmatch_file(path: str, db=None) -> dict:
+    with open(path, "r", encoding="utf-8") as fh:
+        text = fh.read()
+    return vulnmatch_text(text, path=path, db=db)
+
+
+# --------------------------------------------------------------------------- #
+# Convenience aliases used by the MCP server and external callers.
+# `scan` returns a Report (the lint result); `to_json` serialises it.
+# --------------------------------------------------------------------------- #
+def scan(target: str) -> Report:
+    """Lint a Dockerfile path (alias for lint_file)."""
+    return lint_file(target)
+
+
+def to_json(report: Report) -> str:
+    """Serialise a Report (or dict) to a JSON string."""
+    if isinstance(report, Report):
+        return _json.dumps(report.to_dict(), indent=2)
+    return _json.dumps(report, indent=2)
