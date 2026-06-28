@@ -26,6 +26,65 @@ your base image and `RUN install` steps actually pull in. It never touches the
 network: the vulnerability database ships inside the wheel, so it runs the same
 on a laptop or in an air-gapped enclave.
 
+
+<!-- cognis:example:start -->
+## 🔎 Example output
+
+Real, reproducible output from the tool — runs offline:
+
+```console
+$ shipcheck-emit --version
+shipcheck 0.6.4
+```
+
+```console
+$ shipcheck-emit --help
+usage: shipcheck [-h] [--version] {lint,vulnmatch,db,feeds} ...
+
+Dockerfile linter with image-size and CVE advisories.
+
+positional arguments:
+  {lint,vulnmatch,db,feeds}
+    lint                lint one or more Dockerfiles
+    vulnmatch           match a Dockerfile's base-image + installed packages
+                        against the bundled offline OSV vulnerability DB (262k
+                        real vulns)
+    db                  query the bundled offline OSV vulnerability database
+    feeds               list / refresh keyless intel feeds for edge & air-gap
+                        use
+
+options:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+```
+
+> Blocks above are real `shipcheck` output — reproduce them from a clone.
+
+**Sample result format** _(illustrative values — run on your own data for real findings):_
+
+```
+{
+"findings": [
+    {
+        "id": "1234567890",
+        "title": "Example Finding 1",
+        "description": "This is an example finding.",
+        "type": "indicator",
+        "spec_version": "2.11.1"
+    },
+    {
+        "id": "2345678901",
+        "title": "Example Finding 2",
+        "description": "This is another example finding.",
+        "type": "attack-pattern",
+        "spec_version": "2.11.1"
+    }
+]
+}
+```
+
+<!-- cognis:example:end -->
+
 ## Contents
 
 - [Why shipcheck?](#why) · [Features](#features) · [Quick start](#quick-start) · [Commands](#commands) · [Worked examples](#examples) · [Offline CVE DB](#cvedb) · [Edge / air-gap](#edge) · [Architecture](#architecture) · [Polyglot ports](#ports) · [AI / MCP](#ai-stack) · [How it compares](#how-it-compares) · [Integrations](#integrations) · [Install anywhere](#install-anywhere) · [Scope & safety](#scope) · [Related](#related) · [Contributing](#contributing)

@@ -1,0 +1,19 @@
+$ shipcheck-emit --help
+
+usage: shipcheck [-h] [--version] {lint,vulnmatch,db,feeds} ...
+
+Dockerfile linter with image-size and CVE advisories.
+
+positional arguments:
+  {lint,vulnmatch,db,feeds}
+    lint                lint one or more Dockerfiles
+    vulnmatch           match a Dockerfile's base-image + installed packages
+                        against the bundled offline OSV vulnerability DB (262k
+                        real vulns)
+    db                  query the bundled offline OSV vulnerability database
+    feeds               list / refresh keyless intel feeds for edge & air-gap
+                        use
+
+options:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit

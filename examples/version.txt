@@ -1,0 +1,3 @@
+$ shipcheck-emit --version
+
+shipcheck 0.6.4
