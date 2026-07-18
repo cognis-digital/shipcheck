@@ -1,0 +1,23 @@
+[2026-07-17 21:31:35] === enhance · shipcheck · words=120000 loc>=10000 langs=9 push=True ===
+[2026-07-17 21:31:41] phase DOCS — longform 120000-word corpus -> docs/corpus/
+[2026-07-18 05:46:41] phase POLYGLOT — expanding to >= 10000 LOC across 9 languages
+[2026-07-18 05:47:15]   facets: ['dockerfile_parser', 'layer_size_calculator', 'cve_advisory_fetcher', 'rule_engine', 'report_formatter', 'config_loader']
+[2026-07-18 05:49:13]   +polyglot/python/dockerfile_parser.py  (loc now ~3795)
+[2026-07-18 05:50:11]   +polyglot/go/dockerfile_parser.go  (loc now ~4045)
+[2026-07-18 05:52:07]   +polyglot/rust/dockerfile_parser.rs  (loc now ~4447)
+[2026-07-18 05:54:02]   +polyglot/typescript/dockerfile_parser.ts  (loc now ~4948)
+[2026-07-18 05:55:57]   +polyglot/c/dockerfile_parser.c  (loc now ~5395)
+[2026-07-18 05:57:54]   +polyglot/cpp/dockerfile_parser.cpp  (loc now ~5842)
+[2026-07-18 05:59:50]   +polyglot/java/dockerfile_parser.java  (loc now ~6279)
+[2026-07-18 06:01:23]   +polyglot/ruby/dockerfile_parser.rb  (loc now ~6684)
+[2026-07-18 06:02:32]   +polyglot/csharp/dockerfile_parser.cs  (loc now ~6984)
+[2026-07-18 06:03:35]   +polyglot/python/layer_size_calculator.py  (loc now ~7203)
+[2026-07-18 06:05:31]   +polyglot/go/layer_size_calculator.go  (loc now ~7661)
+[2026-07-18 06:07:27]   +polyglot/rust/layer_size_calculator.rs  (loc now ~8095)
+[2026-07-18 06:09:08]   +polyglot/typescript/layer_size_calculator.ts  (loc now ~8483)
+[2026-07-18 06:10:15]   +polyglot/c/layer_size_calculator.c  (loc now ~8713)
+[2026-07-18 06:12:11]   +polyglot/cpp/layer_size_calculator.cpp  (loc now ~9146)
+[2026-07-18 06:13:50]   +polyglot/java/layer_size_calculator.java  (loc now ~9448)
+[2026-07-18 06:15:46]   +polyglot/ruby/layer_size_calculator.rb  (loc now ~9580)
+[2026-07-18 06:17:05]   +polyglot/csharp/layer_size_calculator.cs  (loc now ~9921)
+[2026-07-18 06:19:01]   +polyglot/python/cve_advisory_fetcher.py  (loc now ~10340)
